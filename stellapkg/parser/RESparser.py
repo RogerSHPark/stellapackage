@@ -9,7 +9,6 @@ from stellapkg import STLROOT
 from stellapkg.utils import physcons
 from stellapkg.utils import STLkeys
 
-import pandas as pd
 import numpy as np
 
 class res_data():
@@ -40,13 +39,19 @@ class res_data():
         
         starts = []
         ends = []
-        contents = dict(obstime=[], protime=[], data=[], nstep=[], stept=[])
+        estarts = []
+        eends = []
+        contents = dict(obstime=[], protime=[], data=[], nstep=[], stept=[], edata=[])
         
         for i, line in enumerate(lines):
             if line.startswith('%H:'):
                 starts.append(i)
             elif line.startswith('%B:'):
                 ends.append(i)
+            elif line.startswith(" EFFECTIVE TEMPERATURE"):
+                estarts.append(i)
+            elif line.startswith(" THERMAL  ENERGY"):
+                eends.append(i)
                 
         for i, idx in enumerate(starts):
             if (ends[i] - starts[i]) == 5:
@@ -63,6 +68,12 @@ class res_data():
             contents["stept"].append(float(stepused))
             contents["data"].append(lines[idx+4:ends[i]])
             
+        for i, idx in enumerate(estarts):
+            elines = lines[idx:eends[i]+1]
+            if elines not in contents['edata']:
+                contents["edata"].append(lines[idx:eends[i]+1])
+        
+        ###### OBSOLETE PART ############
         # line = contents['data'][0][0]
         
         # reskeys = []
@@ -74,12 +85,13 @@ class res_data():
         # for i, item in enumerate(contents["data"]):
         #     np.savetxt("tmp.txt", item, fmt='%s')
         #     contents["data"][i] = pd.read_fwf("tmp.txt", colspecs=colspecs)
+        ####################################
         
-        reskeys = STLkeys.reskeys_raw
-
         for i, item in enumerate(contents['data']):
             data = self._get_data_into_array(item)
             contents['data'][i] = data
+            
+        contents['edata'] = self._get_edata_into_array(contents['edata'])
 
         return Mtot,contents
     
@@ -105,49 +117,75 @@ class res_data():
                 data[key] = np.array(data[key],dtype=float)
         return data
     
-    def get_edata(self):
-        '''
-        Time serial of various energies
-        '''
-        fname = self._filename
-        f = open(fname,'r')
-        lines1 = f.read().splitlines()
-        cols = ['time','thermal','virial','kinetic','radiat','gravit','total','gained',\
-                'surfL','vol_gains_pow','tot_gains_pow','viscous virial','virial balance',\
-                'total balance']
+    def _get_edata_into_array(self,contents):
         
-        starts = []
-        ends = []
+        reskeys = STLkeys.reskeys_eng
+        data = {k:[] for k in reskeys}
         
-        data = {k:[] for k in cols}
-
-        for i, line in enumerate(lines1):
-            if line.startswith('%H:'):
-                starts.append(i)
-            elif line.startswith('%B:'):
-                ends.append(i)
-                
-        for i, idx in enumerate(starts):
-            obst = lines1[idx+3].split(' S ')[0].split('T= ')[-1].strip()
-            data['time'].append(float(obst))
+        for i, item in enumerate(contents):
+            data['vol_gains_pow'].append(float(item[1][36:50])/10.)
+            data['surfL'].append(float(item[2][36:50])/10.)
+            data['tot_gains_pow'].append(float(item[3][36:50])/10.)
+            data['radiat'].append(float(item[4][31:50])/10.)
+            data['total'].append(float(item[4][87:102])/10.)
+            data['kinetic'].append(float(item[5][31:50])/10.)
+            data['gained'].append(float(item[5][87:102])/10.)
+            data['gravit'].append(float(item[6][31:50])/10.)
+            data['viscous virial'].append(float(item[6][87:102])/10.)
+            data['virial'].append(float(item[7][31:50])/10.)
+            data['virial balance'].append(float(item[7][87:102])/10.)
+            data['thermal'].append(float(item[8][31:50])/10.)
+            data['total balance'].append(float(item[8][87:102])/10.)
         
-        for i, idx in enumerate(lines1):
-            if idx.startswith('   OB.T(D)'):
-                data['thermal'].append(float(lines1[i-2][31:46])/10.)
-                data['virial'].append(float(lines1[i-3][31:46])/10.)
-                data['gravit'].append(float(lines1[i-4][31:46])/10.)
-                data['kinetic'].append(float(lines1[i-5][31:55])/10.)
-                data['radiat'].append(float(lines1[i-6][31:46])/10.)
-                data['total'].append(float(lines1[i-6][87:102])/10.)
-                data['gained'].append(float(lines1[i-5][87:102])/10.)
-                data['viscous virial'].append(float(lines1[i-4][87:102])/10.)
-                data['virial balance'].append(float(lines1[i-3][87:102])/10.)
-                data['total balance'].append(float(lines1[i-2][87:102])/10.)
-                data['surfL'].append(float(lines1[i-8][36:50])/10.)
-                data['vol_gains_pow'].append(float(lines1[i-9][36:50])/10.)
-                data['tot_gains_pow'].append(float(lines1[i-7][36:50])/10.)
-
         return data
+            
+    #### OBSOLETE ROUTINE FOR GETTING EDATA ###########
+    # def get_edata(self):
+    #     '''
+    #     Time serial of various energies
+    #     '''
+    #     fname = self._filename
+    #     f = open(fname,'r')
+    #     lines1 = f.read().splitlines()
+    #     cols = ['obstime','protime','thermal','virial','kinetic','radiat','gravit','total','gained',\
+    #             'surfL','vol_gains_pow','tot_gains_pow','viscous virial','virial balance',\
+    #             'total balance']
+        
+    #     starts = []
+    #     ends = []
+        
+    #     data = {k:[] for k in cols}
+
+    #     for i, line in enumerate(lines1):
+    #         if line.startswith('%H:'):
+    #             starts.append(i)
+    #         elif line.startswith('%B:'):
+    #             ends.append(i)
+                
+    #     for i, idx in enumerate(starts):
+    #         obst = lines1[idx+3].split(' S ')[0].split('T= ')[-1].strip()
+    #         propt = lines1[idx+3].split(' S ')[0].split('T= ')[-1].strip()
+    #         data['obstime'].append(float(obst))
+    #         data['protime'].append(float(propt))
+        
+    #     for i, idx in enumerate(lines1):
+    #         if idx.startswith('   OB.T(D)'):
+    #             data['thermal'].append(float(lines1[i-2][31:46])/10.)
+    #             data['virial'].append(float(lines1[i-3][31:46])/10.)
+    #             data['gravit'].append(float(lines1[i-4][31:46])/10.)
+    #             data['kinetic'].append(float(lines1[i-5][31:55])/10.)
+    #             data['radiat'].append(float(lines1[i-6][31:46])/10.)
+    #             data['total'].append(float(lines1[i-6][87:102])/10.)
+    #             data['gained'].append(float(lines1[i-5][87:102])/10.)
+    #             data['viscous virial'].append(float(lines1[i-4][87:102])/10.)
+    #             data['virial balance'].append(float(lines1[i-3][87:102])/10.)
+    #             data['total balance'].append(float(lines1[i-2][87:102])/10.)
+    #             data['surfL'].append(float(lines1[i-8][36:50])/10.)
+    #             data['vol_gains_pow'].append(float(lines1[i-9][36:50])/10.)
+    #             data['tot_gains_pow'].append(float(lines1[i-7][36:50])/10.)
+
+    #     return data
+    ###########################
                 
     
     def get_profile(self,t1,propert=False):

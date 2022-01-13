@@ -7,7 +7,10 @@ Created on Mon Jan 10 10:08:26 2022
 
 reskeys_raw = ['ZON','AM/SOL','R14.','V 8.','T 5.','Trad5','lgD-6.','lgP 7.',\
                'lgQv','lgQRT','XHI','ENG','LUM','CAPPA','ZON2','n_bar','n_e','Fe','II','III']
-
+    
+reskeys_eng = ['thermal','virial','kinetic','radiat','gravit','total','gained','surfL',\
+               'vol_gains_pow','tot_gains_pow','viscous virial','virial balance','total balance']
+    
 reskeys = ['mass','logm','xm','zone','temp','trad','vel','rad','rho','press',\
            'cappa','n_bar','n_e','lum','XHI','rhoNm','nenb']
 
