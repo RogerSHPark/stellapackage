@@ -379,7 +379,7 @@ class res_data():
         return datan
            
     def _get_data_by_obstime(self,contents, obstime,propert=False):
-        '''private routine used in raw_data'''
+        '''private routine used in get_profile'''
         idx = np.argwhere(np.array(contents["obstime"]) == float(obstime))
         if propert: idx = np.argwhere(np.array(contents["protime"]) == float(obstime))
         results = []
