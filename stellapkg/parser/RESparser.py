@@ -41,10 +41,6 @@ class res_data():
         starts = []
         ends = []
         contents = dict(obstime=[], protime=[], data=[], nstep=[], stept=[])
-        colspecs = ((0, 4), (4, 13), (13, 25), (25, 33), (33, 43), (43, 51), (51, 58),
-                    (58, 65), (65, 72), (72, 79), (79, 89), (89, 99), (99, 109),
-                    (109, 119), (119, 124), (124, 134), (134, 144), (144, 154),
-                    (154, 164), (164, 174))
         
         for i, line in enumerate(lines):
             if line.startswith('%H:'):
@@ -82,19 +78,32 @@ class res_data():
         reskeys = STLkeys.reskeys_raw
 
         for i, item in enumerate(contents['data']):
-            data = {k:[] for k in reskeys}
-            for line in item[1:]:
-                for j, key in enumerate(reskeys):
-                    x0, x1 = colspecs[j]
-                    data[key].append(line[x0:x1])
-            for key in reskeys:
-                if key[:3]=='ZON':
-                    data[key] = np.array(data[key],dtype=int)
-                else:
-                    data[key] = np.array(data[key],dtype=float)
+            data = self._get_data_into_array(item)
+            contents['data'][i] = data
 
         return Mtot,contents
     
+    def _get_data_into_array(self,item):
+        
+        reskeys = STLkeys.reskeys_raw
+        colspecs = ((0, 4), (4, 13), (13, 25), (25, 33), (33, 43), (43, 51), (51, 58),
+                    (58, 65), (65, 72), (72, 79), (79, 89), (89, 99), (99, 109),
+                    (109, 119), (119, 124), (124, 134), (134, 144), (144, 154),
+                    (154, 164), (164, 174))
+        data = {k:[] for k in reskeys}
+        for line in item[1:]:
+            for j, key in enumerate(reskeys):
+                x0, x1 = colspecs[j]
+                dataentry = line[x0:x1].strip()
+                if (dataentry[4:6]=='-1') and (dataentry[4:6]!='E-'):
+                    dataentry = dataentry[:4]+'E'+dataentry[4:]
+                data[key].append(dataentry)
+        for key in reskeys:
+            if key[:3]=='ZON':
+                data[key] = np.array(data[key],dtype=int)
+            else:
+                data[key] = np.array(data[key],dtype=float)
+        return data
     
     def get_edata(self):
         '''
