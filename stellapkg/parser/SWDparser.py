@@ -6,8 +6,12 @@ Created on Mon Jan 10 10:18:00 2022
 """
 
 from stellapkg import STLROOT
-import numpy as np
 from stellapkg.utils import physcons
+from stellapkg.utils import STLkeys
+from stellapkg.parser.ABNparser import abn_data
+from stellapkg.parser.HYDparser import hyd_data
+
+import numpy as np
 
 class swd_profile():
     '''
@@ -16,11 +20,13 @@ class swd_profile():
     def __init__(self,a):
         
         self._filename = STLROOT.get_filename(a)+'.swd'
-        print('reading from '+self._filename)   
+        print('reading from '+self._filename)
         
-        time,logm,data = self.get_data()
+        self._hyd = hyd_data(a)
+        self._abn = abn_data(a)
+        
+        time,data = self.get_data()
         self.time = time
-        self.logm = logm
         self.data = data
     
     def __del__(self):
@@ -33,14 +39,12 @@ class swd_profile():
         '''
         fname = self._filename
         f = np.genfromtxt(fname,skip_header=0)
-        # x = star.read_file(fname[:-4]+'.abn',0)
-        h = np.genfromtxt(fname[:-4]+'.hyd', skip_header=1)
-        Mtot = max(h[:,6])
+        h = self._hyd
+        Mtot = max(h.data['mass'])
         
         nlines = len(f[:,0])
         nzone = 249
         nblock = int(nlines/nzone)
-        # print(nlines,nzone,nblock)
         
         cols = ['time','zone','xm','logR','vel','logT','logTrad','logRho','logP',\
                 'logqv','eng12','L','cappa','logm','mass']
@@ -50,6 +54,7 @@ class swd_profile():
         k=0
         
         data['zone'] = f[0:nzone,1]
+        
         logm = f[0:nzone,2]
         data['xm'] = logm
         data['logm'] = logm - np.log10(Mtot)
@@ -72,7 +77,7 @@ class swd_profile():
             
             k = k + nzone
             
-        return time,logm,data
+        return time,data
     
     def snapshot(self,t1):
         
@@ -105,15 +110,15 @@ class swd_profile():
         '''
         photospheric properties
         '''
-        fname = self._filename
         data = self.data
-        x = np.genfromtxt(fname[:-4]+'.abn', skip_header=0)
+        x = self._abn.data
         nzone = 249
         
         cols = ['time','tau','zoneph','massph','logmph','logTph','logTradph','logRhoph',\
                 'velph','cappaph','logRph','Lph','logPph','logRhoNmph']
-        Xph = {'H':[],'He':[],'C':[],'N':[],'O':[],'Ne':[],'Mg':[],'Si':[],\
-               'S':[],'Ar':[],'Ca':[],'Fe':[],'Ni':[]}
+            
+        abnkeys = [_[0] for _ in STLkeys.abnkeys]
+        Xph = {k:[] for k in abnkeys}
         
         datan = {k:[] for k in cols}
         tau = np.zeros((nzone),float)
@@ -143,19 +148,11 @@ class swd_profile():
             datan['Lph'].append(data['L'][i][ntau])
             datan['logPph'].append(data['logP'][i][ntau])
             datan['logRhoNmph'].append(data['logRhoNm'][i][ntau])
-            Xph['H'].append(x[ntau,4])
-            Xph['He'].append(x[ntau,5])
-            Xph['C'].append(x[ntau,6])
-            Xph['N'].append(x[ntau,7])
-            Xph['O'].append(x[ntau,8])
-            Xph['Ne'].append(x[ntau,9])
-            Xph['Mg'].append(x[ntau,11])
-            Xph['Si'].append(x[ntau,13])
-            Xph['S'].append(x[ntau,14])
-            Xph['Ar'].append(x[ntau,15])
-            Xph['Ca'].append(x[ntau,16])
-            Xph['Fe'].append(x[ntau,17])
-            Xph['Ni'].append(x[ntau,19])
+            
+            
+            for _ in abnkeys:
+                Xph[_].append(x[_][ntau])
+
         datan['Xph'] = Xph
         
         return datan

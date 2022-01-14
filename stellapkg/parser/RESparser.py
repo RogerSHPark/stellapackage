@@ -212,7 +212,6 @@ class res_data():
             return []        
         
         res = self._get_data_by_obstime(data,t1,propert=propert)
-        res = res[0]
 
         mass = []
         for i in np.array(res["AM/SOL"]):
@@ -385,4 +384,4 @@ class res_data():
         results = []
         for i in idx:
             results.append(contents["data"][i[0]])
-        return results       
+        return results[0]       

@@ -19,5 +19,5 @@ swdkeys = ['time','zone','xm','logm','mass','logR','vel','logT','logTrad',\
     
 hydkeys = [('dm',1),('rad',2),('rho',3),('temp',4),('vel',5),('mass',6)]
     
-abnkeys = [('H',4),('He',5),('C',6),('O',7),('N',8),('O',9),('Ne',10),('Mg',11),\
+abnkeys = [('H',4),('He',5),('C',6),('N',7),('O',8),('Ne',9),('Mg',11),\
            ('Si',13),('S',14),('Ar',15),('Ca',16),('Fe',17),('Ni',19)]
