@@ -13,7 +13,7 @@ from stellapkg.parser.HYDparser import hyd_data
 
 import numpy as np
 
-class swd_profile():
+class swd_data():
     '''
     loading .swd data
     '''
@@ -25,14 +25,14 @@ class swd_profile():
         self._hyd = hyd_data(a)
         self._abn = abn_data(a)
         
-        time,data = self.get_data()
-        self.time = time
+        grid,data = self._get_data()
+        self.grid = grid
         self.data = data
     
     def __del__(self):
         print('swd file closed')
         
-    def get_data(self):
+    def _get_data(self):
         '''
         swd file provides internal profile at time epochs
         set by entry in .dat file
@@ -41,48 +41,59 @@ class swd_profile():
         f = np.genfromtxt(fname,skip_header=0)
         h = self._hyd
         Mtot = max(h.data['mass'])
+        self._Mtot = Mtot
         
         nlines = len(f[:,0])
         nzone = 249
         nblock = int(nlines/nzone)
         
-        cols = ['time','zone','xm','logR','vel','logT','logTrad','logRho','logP',\
-                'logqv','eng12','L','cappa','logm','mass']
-        data = {k:[] for k in cols}
-        time = []
+        grid = {'time':[],'mass':[],'logm':[],'xm':[],'zone':[]}
+        keys = [_[0] for _ in STLkeys.swdkeys]
+        data = {_:[] for _ in keys}
         
         k=0
         
-        data['zone'] = f[0:nzone,1]
+        grid['zone'] = f[0:nzone,1]
         
         logm = f[0:nzone,2]
-        data['xm'] = logm
-        data['logm'] = logm - np.log10(Mtot)
-        data['mass'] = Mtot - 10.**logm
-        data['logRhoNm'] = []
+        grid['xm'] = logm
+        grid['logm'] = logm - np.log10(Mtot)
+        grid['mass'] = Mtot - 10.**logm
         for i in range(0,nblock):
-            time.append(f[k,0])
-            data['time'].append(f[k,0])
-            for j in [3,4,5,6,7,8,9,10,11,12]:
-                if cols[j]=='logRho':
-                    data[cols[j]].append(f[k:k+nzone,j]-6.)
-                elif cols[j]=='logP':
-                    data[cols[j]].append(f[k:k+nzone,j]+7.)
-                elif cols[j]=='L':
-                    data[cols[j]].append(f[k:k+nzone,j]*1e40)
-                else:
-                    data[cols[j]].append(f[k:k+nzone,j])
-            rhobar = Mtot*physcons.MSUN/(4.*physcons.PI*10.**(3*np.max(data['logR'][i]))/3.)
-            data['logRhoNm'].append(data['logRho'][i]-np.log10(rhobar))
+            grid['time'].append(f[k,0])
+            for key_ in keys:
+                j = [_[1] for _ in STLkeys.swdkeys if _[0]==key_][0]
+                data[key_].append(f[k:k+nzone,j])
+            k=k+nzone
             
-            k = k + nzone
+        for key_ in keys:
+            data[key_] = np.array(data[key_])
+        data['logRho'] = data['logRho']-6.
+        data['logP'] = data['logP']+7.
+        data['L'] = data['L']*1e40
+
+             
+            # for j in [3,4,5,6,7,8,9,10,11,12]:
+            #     if cols[j]=='logRho':
+            #         data[cols[j]].append(f[k:k+nzone,j]-6.)
+            #     elif cols[j]=='logP':
+            #         data[cols[j]].append(f[k:k+nzone,j]+7.)
+            #     elif cols[j]=='L':
+            #         data[cols[j]].append(f[k:k+nzone,j]*1e40)
+            #     else:
+            #         data[cols[j]].append(f[k:k+nzone,j])
+            # # rhobar = Mtot*physcons.MSUN/(4.*physcons.PI*10.**(3*np.max(data['logR'][i]))/3.)
+            # data['logRhoNm'].append(data['logRho'][i]-np.log10(rhobar))
             
-        return time,data
+            # k = k + nzone
+            
+        return grid,data
     
-    def snapshot(self,t1):
+    def get_profile(self,t1):
         
-        time = self.time
+        time = self.grid['time']
         data = self.data
+        Mtot = self._Mtot
 
         if (t1 not in time):
             print(f'No data in {t1}d')
@@ -100,16 +111,19 @@ class swd_profile():
         
         indx = np.argwhere(np.array(time)==t1)[0][0]
         keys = list(data.keys())
-        excl = ['time','zone','xm','logm','mass']
-        keys = [k for k in keys if k not in excl]
         datan = {k:data[k][indx] for k in keys}
         
+        rhobar = Mtot*physcons.MSUN/(4.*physcons.PI*10.**(3*np.max(data['logR'][indx]))/3.)
+        datan['logRhoNm'] = data['logRho'][indx] - np.log10(rhobar)
+        
         return datan
+
         
     def get_phots(self):
         '''
         photospheric properties
         '''
+        grid = self.grid
         data = self.data
         x = self._abn.data
         nzone = 249

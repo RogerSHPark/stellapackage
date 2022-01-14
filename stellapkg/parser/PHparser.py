@@ -101,7 +101,7 @@ class ph_data():
         
         return photm
     
-    def snapshot(self,t1):
+    def get_profile(self,t1):
         '''
         Fnu and Fwv data of time t1
         '''

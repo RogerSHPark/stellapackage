@@ -8,6 +8,8 @@ Created on Mon Jan 10 10:12:54 2022
 from stellapkg import STLROOT
 from stellapkg.utils import physcons
 from stellapkg.utils import STLkeys
+from stellapkg.parser.ABNparser import abn_data
+from stellapkg.parser.HYDparser import hyd_data
 
 import numpy as np
 
@@ -19,6 +21,9 @@ class res_data():
         
         self._filename = STLROOT.get_filename(a)+'.res'
         print('reading from '+self._filename)
+        
+        self._hyd = hyd_data(a)
+        self._abn = abn_data(a)
         
         Mtot,data = self._get_data()
         self.data = data
@@ -194,8 +199,10 @@ class res_data():
         '''
         data = self.data
         Mtot = self._Mtot
+        
         time = data['obstime']
-        if propert: time = np.array(data['protime'])
+        if propert: 
+            time = np.array(data['protime'])
 
         if (t1 not in time):
             print(f'No data in {t1}')
@@ -226,16 +233,13 @@ class res_data():
         mass = np.array(mass)
         logm = np.log10(1.-mass/Mtot)
         
-        cols = ['mass','logm','xm','zone','temp','trad','vel','rad','rho','press',\
-                'cappa','n_bar','n_e','lum','XHI']        
-        datan = {k:[] for k in cols}
+        keys = STLkeys.reskeys
+        datan = {k:[] for k in keys}
+        
         datan['mass'] = mass
         datan['logm'] = logm
-        
         datan['xm'] = res["AM/SOL"]
         datan['zone'] = res['ZON']
-        temp = res['T 5.']*10.**5
-        trad = res['Trad5']*10**5
         datan['vel'] = res['V 8.']*10**8
         datan['rad'] = res['R14.']*10**14
         datan['rho'] = 10.**(res['lgD-6.']-6.)
@@ -246,11 +250,8 @@ class res_data():
         datan['lum'] = res['LUM']
         datan['XHI'] = res['XHI']
         
-        rhobar = Mtot*physcons.MSUN/(4.*physcons.PI*np.max(datan['rad'])**3./3.)
-        datan['rhoNm'] = datan['rho']/rhobar
-        
-        datan['nenb'] = datan['n_e']/datan['n_bar']
-       
+        temp = res['T 5.']*10.**5
+        trad = res['Trad5']*10**5
         for i, item in enumerate(temp):
             if item==0:
                 temp[i] = 10.
@@ -261,29 +262,32 @@ class res_data():
         
         datan['temp'] = temp
         datan['trad'] = trad
-
+        
+        rhobar = Mtot*physcons.MSUN/(4.*physcons.PI*np.max(datan['rad'])**3./3.)
+        datan['rhoNm'] = datan['rho']/rhobar
+        datan['nenb'] = datan['n_e']/datan['n_bar']
+        
+        dMr = self._hyd.data['dm']       
+        vol = dMr[datan['zone']-1]/datan['rho']/1e51
+        ERAD = 4.*physcons.SIG/physcons.C*datan['trad']**4.*vol
+        ETHM = 1.5*(datan['n_bar']+datan['n_e'])*physcons.KB*datan['temp']*vol
+        EKIN = 0.5*datan['vel']**2.*vol*datan['rho']
+        EGRA = -1*physcons.G*np.array(datan['mass'])*vol*datan['rho']/datan['rad']
+        datan['ERAD'] = ERAD; datan['ETHM'] = ETHM; datan['EKIN'] = EKIN; datan['EGRA'] = EGRA
+        
         return datan
 
-          
-    def get_eprofile(self,t1):     
-        '''
-        energy profile data at time t1
-        '''
-        fname = self._filename
-        s = self.get_profile(t1)
-        hh = np.genfromtxt(fname[:-4]+'.hyd', skip_header=1)
-        dMr = hh[:,1]*physcons.MSUN
+    def _get_data_by_obstime(self,contents, obstime,propert=False):
+        '''private routine used in get_profile'''
+        idx = np.argwhere(np.array(contents["obstime"]) == float(obstime))
+        if propert: 
+            idx = np.argwhere(np.array(contents["protime"]) == float(obstime))
+        results = []
+        for i in idx:
+            results.append(contents["data"][i[0]])
+        return results[0]    
+
         
-        vol = dMr[s['zone']-1]/s['rho']/1e51
-        ERAD = 4.*physcons.SIG/physcons.C*s['trad']**4.*vol
-        ETHM = 1.5*(s['n_bar']+s['n_e'])*physcons.KB*s['temp']*vol
-        EKIN = 0.5*s['vel']**2.*vol*s['rho']
-        EGRA = -1*physcons.G*np.array(s['mass'])*dMr[s['zone']-1]/s['rad']/1.0e51   
-        
-        data = {'ERAD':ERAD,'ETHM':ETHM,'EKIN':EKIN,'EGRA':EGRA}
-        
-        return data
-      
     def get_phots(self,thm=False):
         '''
         Compute photosperic properties from profile
@@ -377,11 +381,4 @@ class res_data():
         datan['Xph'] = Xph
         return datan
            
-    def _get_data_by_obstime(self,contents, obstime,propert=False):
-        '''private routine used in get_profile'''
-        idx = np.argwhere(np.array(contents["obstime"]) == float(obstime))
-        if propert: idx = np.argwhere(np.array(contents["protime"]) == float(obstime))
-        results = []
-        for i in idx:
-            results.append(contents["data"][i[0]])
-        return results[0]       
+   

@@ -12,10 +12,13 @@ reskeys_eng = ['thermal','virial','kinetic','radiat','gravit','total','gained','
                'vol_gains_pow','tot_gains_pow','viscous virial','virial balance','total balance']
     
 reskeys = ['mass','logm','xm','zone','temp','trad','vel','rad','rho','press',\
-           'cappa','n_bar','n_e','lum','XHI','rhoNm','nenb']
+           'cappa','lum','n_bar','n_e','XHI']
 
-swdkeys = ['time','zone','xm','logm','mass','logR','vel','logT','logTrad',\
-           'logRho','logP','logqv','eng12','L','cappa']
+swdkeys = [('logT',5),('logTrad',6),('vel',4),('logR',3),('logRho',7),('logP',8),\
+           ('cappa',12),('L',11),('logqv',9),('eng12',10)]
+    
+# swdkeys = ['time','zone','xm','logm','mass','logR','vel','logT','logTrad',\
+#            'logRho','logP','logqv','eng12','L','cappa']
     
 hydkeys = [('dm',1),('rad',2),('rho',3),('temp',4),('vel',5),('mass',6)]
     
