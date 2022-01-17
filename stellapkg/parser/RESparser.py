@@ -267,7 +267,7 @@ class res_data():
         datan['rhoNm'] = datan['rho']/rhobar
         datan['nenb'] = datan['n_e']/datan['n_bar']
         
-        dMr = self._hyd.data['dm']       
+        dMr = self._hyd.data['dm']*physcons.MSUN       
         vol = dMr[datan['zone']-1]/datan['rho']/1e51
         ERAD = 4.*physcons.SIG/physcons.C*datan['trad']**4.*vol
         ETHM = 1.5*(datan['n_bar']+datan['n_e'])*physcons.KB*datan['temp']*vol
