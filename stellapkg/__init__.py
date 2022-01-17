@@ -17,3 +17,5 @@ from .parser import RESparser
 
 from .utils import physcons
 from .utils import STLkeys
+
+from .core import plot

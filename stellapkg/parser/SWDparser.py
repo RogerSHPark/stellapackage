@@ -128,17 +128,20 @@ class swd_data():
         x = self._abn.data
         nzone = 249
         
-        cols = ['time','tau','zoneph','massph','logmph','logTph','logTradph','logRhoph',\
-                'velph','cappaph','logRph','Lph','logPph','logRhoNmph']
-            
+        swdkeys = [_[0] for _ in STLkeys.swdkeys]
+        swdkeys = [k+'ph' for k in swdkeys]
+        datan = {k:[] for k in swdkeys}
+        dict_ = {'time':[], 'tau':[], 'zoneph':[], 'massph':[], 'logmph':[]}
+        datan.update(dict_)
+        
         abnkeys = [_[0] for _ in STLkeys.abnkeys]
         Xph = {k:[] for k in abnkeys}
         
-        datan = {k:[] for k in cols}
         tau = np.zeros((nzone),float)
+        datan['time'] = data['time']
         for i, item in enumerate(data['time']):
+            prof = self.get_profile(item)
             tau[nzone-1] = 0.0
-            datan['time'].append(item)
             
             logR = data['logR'][i]
             logRho = data['logRho'][i]
@@ -150,19 +153,12 @@ class swd_data():
                 if tau[j]>=0.67 and tau[j+1]<0.67:
                     ntau = j
             datan['tau'].append(tau)
-            datan['zoneph'].append(data['zone'][ntau])
-            datan['massph'].append(data['mass'][ntau])
-            datan['logmph'].append(data['logm'][ntau])
-            datan['logTph'].append(data['logT'][i][ntau])
-            datan['logTradph'].append(data['logTrad'][i][ntau])
-            datan['logRhoph'].append(data['logRho'][i][ntau])
-            datan['velph'].append(data['vel'][i][ntau])
-            datan['cappaph'].append(data['cappa'][i][ntau])
-            datan['logRph'].append(data['logR'][i][ntau])
-            datan['Lph'].append(data['L'][i][ntau])
-            datan['logPph'].append(data['logP'][i][ntau])
-            datan['logRhoNmph'].append(data['logRhoNm'][i][ntau])
-            
+            datan['zoneph'].append(grid['zone'][ntau])
+            datan['massph'].append(grid['mass'][ntau])
+            datan['logmph'].append(grid['logm'][ntau])
+            for k in swdkeys:
+                datan[k].append(prof[k[:-2]][ntau])
+            datan['logRhoNmph'].append(prof['logRhoNm'][ntau])
             
             for _ in abnkeys:
                 Xph[_].append(x[_][ntau])

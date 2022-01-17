@@ -288,31 +288,35 @@ class res_data():
         return results[0]    
 
         
-    def get_phots(self,thm=False):
+    def get_phots(self,thm=False,propert=False):
         '''
         Compute photosperic properties from profile
         if thm=True, thermalization depth properties also included
         '''
         fname = self._filename
         data = self.data
-        x = np.genfromtxt(fname[:-4]+'.abn', skip_header=0)
+        x = self._abn.data
         time = data['obstime']
+        if propert: time = data['protime']
 
-        cols = ['time','tau','zoneph','massph','logmph','tempph','tradph','rhoph',\
-                'velph','cappaph','radph','lumph','pressph','n_barph','n_eph','rhoNmph','nenbph']
-        Xph = {'H':[],'He':[],'C':[],'N':[],'O':[],'Ne':[],'Mg':[],'Si':[],\
-               'S':[],'Ar':[],'Ca':[],'Fe':[],'Ni':[]}
+        reskeys = STLkeys.reskeys
+        reskeys = [k+'ph' for k in reskeys]
+        datan = {k:[] for k in reskeys}
+        dict_ = {'tau':[], 'rhoNmph':[], 'nenbph':[]}
+        datan.update(dict_)
+        
+        abnkeys = [_[0] for _ in STLkeys.abnkeys]
+        Xph = {k:[] for k in abnkeys}
 
-        datan = {k:[] for k in cols}
         datan['time'] = time
 
         if thm:
-            colsn = ['tau_th','Mthm','lgMthm','Rthm','Tthm','Rhothm','Vthm','Kthm']
-            dict2 = {k:[] for k in colsn}
+            keys2 = ['tau_thm','Mthm','lgMthm','Rthm','Tthm','Rhothm','Vthm','Kthm']
+            dict2 = {k:[] for k in keys2}
             datan.update(dict2)
         
         for i, item in enumerate(time):
-            prof = self.get_profile(item)
+            prof = self.get_profile(item,propert=propert)
             zon = prof['zone']
             rho = prof['rho']
             rad = prof['rad']
@@ -327,34 +331,11 @@ class res_data():
                     ntau = j
             zontau = zon[ntau]
             datan['tau'].append(tau)
-            datan['zoneph'].append(zon[ntau])
-            datan['massph'].append(prof['mass'][ntau])
-            datan['logmph'].append(prof['logm'][ntau])
-            datan['tempph'].append(prof['temp'][ntau])
-            datan['tradph'].append(prof['trad'][ntau])
-            datan['rhoph'].append(rho[ntau])
-            datan['velph'].append(prof['vel'][ntau])
-            datan['cappaph'].append(cappa[ntau])
-            datan['radph'].append(rad[ntau])
-            datan['lumph'].append(prof['lum'][ntau])
-            datan['pressph'].append(prof['press'][ntau])
-            datan['n_barph'].append(prof['n_bar'][ntau])
-            datan['n_eph'].append(prof['n_e'][ntau])
-            datan['rhoNmph'].append(prof['rhoNm'][ntau])
-            datan['nenbph'].append(prof['nenb'][ntau])
-            Xph['H'].append(x[zontau,4])
-            Xph['He'].append(x[zontau,5])
-            Xph['C'].append(x[zontau,6])
-            Xph['N'].append(x[zontau,7])
-            Xph['O'].append(x[zontau,8])
-            Xph['Ne'].append(x[zontau,9])
-            Xph['Mg'].append(x[zontau,11])
-            Xph['Si'].append(x[zontau,13])
-            Xph['S'].append(x[zontau,14])
-            Xph['Ar'].append(x[zontau,15])
-            Xph['Ca'].append(x[zontau,16])
-            Xph['Fe'].append(x[zontau,17])
-            Xph['Ni'].append(x[zontau,19])
+            for k in list(datan.keys()):
+                if k.endswith('ph'):
+                    datan[k].append(prof[k[:-2]][ntau])
+            for _ in abnkeys:
+                Xph[_].append(x[_][zontau])
             
             if thm:
                 thom_sc = 0.665e-24
@@ -369,7 +350,7 @@ class res_data():
                 for j in range(0,len(zon)-1):
                     if tau_th[j] >= 0.67 and tau_th[j+1]<0.67:
                         ntau_th = j
-                datan['tau_th'].append(tau_th)
+                datan['tau_thm'].append(tau_th)
                 datan['Mthm'].append(prof['mass'][ntau_th])
                 datan['lgMthm'].append(prof['logm'][ntau_th])
                 datan['Rthm'].append(rad[ntau_th])
