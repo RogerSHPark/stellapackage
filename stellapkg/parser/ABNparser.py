@@ -13,9 +13,9 @@ class abn_data():
     '''
     Loading .abn file
     '''    
-    def __init__(self,a):
+    def __init__(self,*a):
         
-        self._filename = STLROOT.get_filename(a)+'.abn'
+        self._filename = STLROOT.get_filename(*a)+'.abn'
         print('reading from '+self._filename)
 
         data = self._get_data()

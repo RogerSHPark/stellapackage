@@ -18,5 +18,6 @@ from .parser import RESparser
 from .utils import physcons
 from .utils import STLkeys
 
-from .core import plot
-from .core import abnplot
+from .core import Lightcurve
+from .core import StructureEvolution
+from .core import InitialStructure

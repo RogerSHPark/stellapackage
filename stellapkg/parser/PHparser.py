@@ -13,9 +13,9 @@ class ph_data():
     '''
     Loading .ph file : spectra data
     '''
-    def __init__(self,a):
+    def __init__(self,*a):
         
-        self._filename = STLROOT.get_filename(a)+'.ph'
+        self._filename = STLROOT.get_filename(*a)+'.ph'
         print('reading from '+self._filename)
         
         data = self._get_data()

@@ -17,13 +17,13 @@ class res_data():
     '''
     loading .res file
     '''    
-    def __init__(self,a):
+    def __init__(self,*a):
         
-        self._filename = STLROOT.get_filename(a)+'.res'
+        self._filename = STLROOT.get_filename(*a)+'.res'
         print('reading from '+self._filename)
         
-        self._hyd = hyd_data(a)
-        self._abn = abn_data(a)
+        self._hyd = hyd_data(*a)
+        self._abn = abn_data(*a)
         
         Mtot,data = self._get_data()
         self.data = data

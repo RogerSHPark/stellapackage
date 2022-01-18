@@ -13,9 +13,9 @@ class hyd_data():
     '''
     Loading .hyd file
     '''    
-    def __init__(self,a):
+    def __init__(self,*a):
         
-        self._filename = STLROOT.get_filename(a)+'.hyd'
+        self._filename = STLROOT.get_filename(*a)+'.hyd'
         print('reading from '+self._filename)
         
         header = self._get_header()

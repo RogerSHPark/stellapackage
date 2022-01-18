@@ -17,13 +17,13 @@ class swd_data():
     '''
     loading .swd data
     '''
-    def __init__(self,a):
+    def __init__(self,*a):
         
-        self._filename = STLROOT.get_filename(a)+'.swd'
+        self._filename = STLROOT.get_filename(*a)+'.swd'
         print('reading from '+self._filename)
         
-        self._hyd = hyd_data(a)
-        self._abn = abn_data(a)
+        self._hyd = hyd_data(*a)
+        self._abn = abn_data(*a)
         
         grid,data = self._get_data()
         self.grid = grid

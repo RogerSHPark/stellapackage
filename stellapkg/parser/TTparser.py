@@ -11,9 +11,9 @@ class tt_data():
     '''
     Loading .tt file
     '''    
-    def __init__(self,a):
+    def __init__(self,*a):
         
-        self._filename = STLROOT.get_filename(a)+'.tt'
+        self._filename = STLROOT.get_filename(*a)+'.tt'
         print('reading from '+self._filename)
         
         data = self._get_data()
