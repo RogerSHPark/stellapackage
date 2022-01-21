@@ -20,14 +20,23 @@ Python package
 1. Read following inputs: .abn .hyd
 2. Read following outputs: .res .swd .tt .ph
 
+
 .abn: zone number, mass fraction of elements (H, He, C, N, O, Ne, Mg, Si, S, Ar, Ca, Fe, Ni)
+
   (*to adjust elements, modify abnkeys in STLkeys.py*)
+  
 .hyd: zone number, dm, radius, rho, temperature, velocity, mass
+
 .tt: time, Tbb, rbb, Teff, Rlast_sc, R(tau2/3), bolometric and UBVRI magnitudes, gdepos
+
 .ph: spectral evolution of the model (~100 frequency zones)
+
 .res: time serial data of various energies (kinetic, thermal, total, etc.), physical properties of the shells at each time stamp (velocity, radius, density, pressure, opacity, baryon/electron # density, luminosity, neutral hydrogen fraction, temperature, radiation temperature), energy of the shells at each time stamp (radiation energy, thermal energy, kinetic energy, gravitational energy; calculated afterwards)
+
 .swd: physical properties of shells at each time stamp
+
   (*similar to .res file but more efficient for time epoch after SBO*)
+  
   
 3. Obtain the location of photosphere/thermalization depth during the evolution
 4. Obtain photometry of bands other than bolUBVRI (currently supported: SDSS-ugriz, ZTF-gr)
@@ -40,4 +49,5 @@ For more specific explanation, refer to individual python files in the package
 
 1. Setting your STELLA working directory as root
 > stellapkg.STLROOT.croot($STELLA_DIR)
+
 (To be updated) 
