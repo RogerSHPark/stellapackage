@@ -138,8 +138,9 @@ class swd_data():
         Xph = {k:[] for k in abnkeys}
         
         tau = np.zeros((nzone),float)
-        datan['time'] = data['time']
-        for i, item in enumerate(data['time']):
+        datan['time'] = grid['time']
+        datan['logRhoNmph'] = []
+        for i, item in enumerate(grid['time']):
             prof = self.get_profile(item)
             tau[nzone-1] = 0.0
             
