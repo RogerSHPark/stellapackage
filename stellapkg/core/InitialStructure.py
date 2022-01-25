@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 17 17:34:55 2022
+'''
+Producing basic figures on initial structure information of the model
+(chemical composition, density, temperature, velocity) 
 
-@author: shpark
-"""
+'''
 
 from stellapkg.parser.ABNparser import abn_data
 from stellapkg.parser.HYDparser import hyd_data
@@ -12,8 +10,16 @@ from stellapkg.parser.HYDparser import hyd_data
 import numpy as np
 import matplotlib.pyplot as plt
 
-def abnplot(*a,elems=[],xkey='mass',ylog=True,oplot=False):
+def abnplot(*a,elems=['H','He','C','O','Fe','Ni'],labels=[],xkey='mass',ylog=True,oplot=False):
+    '''
+    Plotting chemical structure of the model
     
+    elems : elements to include in the figure
+            one or multiple from (H, He, C, N, O, Ne, Mg, Si, S, Ar, Ca, Fe, Ni)
+            by default, (H, He, C, O, Fe, Ni) will be included
+    labels : if not given, use elements' names
+             if given, make sure to match the number of elements
+    '''
     abn = abn_data(*a).data
     hyd = hyd_data(*a).data
     
@@ -27,17 +33,21 @@ def abnplot(*a,elems=[],xkey='mass',ylog=True,oplot=False):
         keys.remove('zone')
     else:
         keys = elems
+        
+    if len(labels)==0:
+        labels = keys
     
-    plt.figure()
-    for k in keys:
+    if not oplot: plt.figure()
+    for i, k in enumerate(keys):
+        label = labels[i]
         if ylog: 
-            plt.plot(xdat,np.log10(abn[k]),label=k)
+            plt.plot(xdat,np.log10(abn[k]),label=label)
             plt.ylim(-4,0)
-            plt.ylabel('log(Mass Fraction)')
+            plt.ylabel('logX')
         else:
-            plt.plot(xdat,abn[k],label=k)
+            plt.plot(xdat,abn[k],label=label)
             plt.ylim(0,1)
-            plt.ylabel('Mass Fraction')
+            plt.ylabel('X')
             
     
     if xkey=='logm':    
@@ -50,12 +60,14 @@ def abnplot(*a,elems=[],xkey='mass',ylog=True,oplot=False):
         plt.xlim(0,250)
         plt.xlabel('Mass zone')
         
-    plt.tight_layout()
-    plt.grid(ls='--',c='grey',lw=0.4)
+    if not oplot:
+        plt.grid(ls='--',c='grey',lw=0.4)
     plt.legend()
+    plt.tight_layout()
     
+
     
-def hydplot(*a,xkey='logm',ykey='rho',ylog=True):
+def hydplot(*a,xkey='logm',ykey='rho',label='',ylog=True,oplot=False):
     
     hyd = hyd_data(*a).data
     
@@ -71,27 +83,44 @@ def hydplot(*a,xkey='logm',ykey='rho',ylog=True):
         xdat = hyd['rad']
     elif xkey=='logR':
         xdat = np.log10(hyd['rad'])
+
     
-    plt.figure()
+    if not oplot: plt.figure()
     if ylog:
-        plt.plot(xdat,np.log10(hyd[ykey]))
-        plt.ylabel(r'$\log($'+ykey+'$)$')
+        plt.plot(xdat,np.log10(hyd[ykey]),label=label)
     else:
-        plt.plot(xdat,hyd[ykey])
-        plt.ylabel(ykey)
+        plt.plot(xdat,hyd[ykey],label=label)
+
+        
+    if ykey=='rho':
+        plt.ylabel(r'$\rho$')
+        if ylog:    plt.ylabel(r'$\log{\rho}$')
+    elif ykey=='dm':
+        plt.ylabel('dm')
+        if ylog:    plt.ylabel(r'$\log{(dm)}$')
+    elif ykey=='temp':
+        plt.ylabel('T')
+        if ylog:    plt.ylabel(r'$\log{T}$')
+    elif ykey=='vel':
+        plt.ylabel('V')
+        if ylog:    plt.ylabel(r'$\log{V}$')
 
 
     if xkey=='logm':        
         plt.xlabel(r'$\log{(1-M_{r}/M_\mathrm{tot})}$')
+        plt.xlim(0,-5)
     elif xkey=='mass':      
         plt.xlabel(r'$M_{r}$')
+        plt.xlim(np.min(xdat),np.max(xdat))
     elif xkey=='zone':      
         plt.xlabel('Mass zone')
+        plt.xlim(0,250)
     elif xkey=='rad':       
         plt.xlabel('R')
     elif xkey=='logR':
         plt.xlabel('logR')
 
-        
+
+    if not oplot:   plt.grid(ls='--',c='grey',lw=0.4)
+    if label != '': plt.legend()
     plt.tight_layout()
-    plt.grid(ls='--',c='grey',lw=0.4)
