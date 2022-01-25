@@ -52,7 +52,10 @@ For more specific explanation, refer to individual python files in the package
 
 2. If STELLA models are saved as $STELLA_DIR/dir1/dir2/.../filename.{res,swd,tt,ph,abn,hyd}, you can use stellapkg like:
 > hyd = stellapkg.HYDparser.hyd_data(dir1,dir2,...,filename)
+> 
 > res = stellapkg.RESparser.res_data(dir1,dir2,...,filename,kwargs).get_phots()
+> 
 > stellapkg.StructureEvolution.KPHplot(dir1,dir2,...,filename,kwargs)
+
 or just:
 > hyd = stellapkg.HYDparser.hyd_data('$STELLA_DIR/dir1/dir2/.../filename.res')
