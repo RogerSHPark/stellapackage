@@ -105,10 +105,10 @@ class ph_data():
         '''
         Fnu and Fwv data of time t1
         '''
-        time = self.time
+        time = self.data['time']
         time = np.array(time)
-        Fnu = self.data['F_nu']
-        Fwv = self.data['F_wv']
+        Fnu = self.data['Fnu']
+        Fwv = self.data['Fwv']
         
         if (t1 not in time):
             print(f'No data in {t1}d')
