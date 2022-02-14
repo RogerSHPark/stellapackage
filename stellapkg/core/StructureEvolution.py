@@ -18,8 +18,8 @@ def IPplot(*a,t1,t2,key,xkey='logm',phots=True,propert=False,oplot=False,grid=Tr
     
     reskeys = ['mass','logm','xm','zone','temp','trad','vel','rad','rho','press',\
             'cappa','n_bar','n_e','lum','XHI','rhoNm','nenb']
-    swdkeys = ['zone','xm','logR','vel','logT','logTrad','logRho','logP',\
-            'logqv','eng12','L','cappa','logm','mass','logRhoNm']
+    swdkeys = ['zone','xm','logR','swdvel','logT','logTrad','logRho','logP',\
+            'logqv','eng12','L','swdcappa','logm','mass','logRhoNm']
     
     phots = phots and (not propert)
         
@@ -65,7 +65,7 @@ def IPplot(*a,t1,t2,key,xkey='logm',phots=True,propert=False,oplot=False,grid=Tr
                 else:
                     plt.plot(mph,np.log10(varph),'*',markersize=10,markeredgecolor='black',color=cm.gist_rainbow(i/len(time2)))
                     
-    elif key in swdkeys:
+    elif (key in swdkeys or key[:3]=='swd'):
         # dtype = 'swd'
         print("Selected key in .swd file")
         f = swd_data(*a)
@@ -73,6 +73,11 @@ def IPplot(*a,t1,t2,key,xkey='logm',phots=True,propert=False,oplot=False,grid=Tr
             pts = f.get_phots()
         time = np.array(f.grid['time'])
         time2 = time[np.where((time>=t1) & (time<=t2))[0]]
+        if key=='swdv': 
+            key='vel'
+        elif key=='swdk':
+            key='cappa'
+                
         for i, t in enumerate(time2):
             mass = f.grid[xkey]
             var = f.get_profile(t)[key]
@@ -290,7 +295,7 @@ def KPHplot(*a,key,levels=[],xkey='logm',propert=False,logt=False,t1=0.,t2=15.,p
     elif key=='nenb':
         cbar.ax.set_ylabel(r'$\log{(n_\mathrm{e}/n_\mathrm{b})}$',fontsize=12)
     else:
-        plt.ylabel('$\log($'+key+'$)$',fontsize=12)
+        cbar.ax.set_ylabel('$\log($'+key+'$)$',fontsize=12)
         
     if tight: plt.tight_layout()
     if phots: plt.legend()
