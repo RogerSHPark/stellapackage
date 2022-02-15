@@ -358,6 +358,25 @@ class res_data():
                 datan['Rhothm'].append(rho[ntau_th])
                 datan['Vthm'].append(prof['vel'][ntau_th])
                 datan['Kthm'].append(cappa[ntau_th])
+                
+                # tau_abs = np.zeros((len(zon)),float)   # This is test for different thermalization depth method
+                # tau_abs[-1] = 0.
+                # tau_sct = np.zeros((len(zon)),float)
+                # tau_sct[-1] = 0.
+                # for j in range(len(zon)-2,0,-1):
+                #     cpabs = np.max(cappa[j] - cappa_sc[j],0)
+                #     tau_abs[j] = tau_abs[j+1] + cpabs*rho[j]*(rad[j+1]-rad[j])
+                #     tau_sct[j] = tau_sct[j+1] + cappa_sc[j]*rho[j]*(rad[j+1]-rad[j])
+                # for j in range(0,len(zon)-1):
+                #     if tau_abs[j]*tau_sct[j]>=0.33 and tau_abs[j+1]*tau_sct[j+1]<0.33:
+                #         ntau_th = j
+                # datan['Mthm'].append(prof['mass'][ntau_th])
+                # datan['lgMthm'].append(prof['logm'][ntau_th])
+                # datan['Rthm'].append(rad[ntau_th])
+                # datan['Tthm'].append(prof['temp'][ntau_th])
+                # datan['Rhothm'].append(rho[ntau_th])
+                # datan['Vthm'].append(prof['vel'][ntau_th])
+                # datan['Kthm'].append(cappa[ntau_th])
 
         datan['Xph'] = Xph
         return datan
