@@ -346,7 +346,7 @@ class res_data():
                 for j in range(len(zon)-2,0,-1):
                     cpabs = cappa[j] - cappa_sc[j]
                     if cpabs < 0 : cpabs = 0.
-                    tau_th[j] = tau_th[j+1] + (cpabs*cappa[j])**0.5*rho[j]*(rad[j+1]-rad[j])
+                    tau_th[j] = tau_th[j+1] + (3*cpabs*cappa[j])**0.5*rho[j]*(rad[j+1]-rad[j])
                 for j in range(0,len(zon)-1):
                     if tau_th[j] >= 0.67 and tau_th[j+1]<0.67:
                         ntau_th = j

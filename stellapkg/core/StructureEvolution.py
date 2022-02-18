@@ -159,7 +159,7 @@ def IPplot(*a,t1,t2,key,xkey='logm',phots=True,propert=False,oplot=False,grid=Tr
     if tight: plt.tight_layout()
     
 
-def KPHplot(*a,key,levels=[],xkey='logm',propert=False,logt=False,t1=0.,t2=15.,phots=False,grid=True,tight=True):
+def KPHplot(*a,key,levels=[],xkey='logm',keylog=True,propert=False,logt=False,t1=0.,t2=15.,phots=False,grid=True,tight=True):
         
     reskeys = ['mass','logm','xm','zone','temp','trad','vel','rad','rho','press',\
             'cappa','n_bar','n_e','lum','XHI','rhoNm','nenb']
@@ -226,9 +226,14 @@ def KPHplot(*a,key,levels=[],xkey='logm',propert=False,logt=False,t1=0.,t2=15.,p
             marr = np.array(prof[xkey])
             if marr[-1]<marr[0]:
                 logvar = np.flip([logvar])[0]
+                var = np.flip([var])[0]
                 marr = np.flip([marr])[0]
-            logvar = np.interp(mgrid,marr,logvar)
-            z.append(logvar)
+            if keylog: 
+                logvar = np.interp(mgrid,marr,logvar)
+                z.append(logvar)
+            else:
+                var = np.interp(mgrid,marr,var)
+                z.append(var)
         
         z = np.array(z)
         
