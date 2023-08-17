@@ -6,6 +6,7 @@ Created on Sat Jan  8 14:43:10 2022
 """
 
 from stellapkg import STLROOT
+import numpy as np
 
 class tt_data():
     '''
@@ -42,5 +43,8 @@ class tt_data():
         for i in range(85,len(content)):
             for j in range(0,len(cols)):
                 data[cols[j]].append(float(content[i].split()[j]))
+                
+        for j in range(0,len(cols)):
+            data[cols[j]] = np.array(data[cols[j]])
 
         return data

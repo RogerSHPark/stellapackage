@@ -65,7 +65,7 @@ class ph_data():
         return data
     
     
-    def get_photm(self,filters=['ZTFg','ZTFr','u','g','r','i','z'],w1=2000,w2=13000):
+    def get_photm(self,filters=['ZTFg','ZTFr','ATLASc','ATLASo','u','g','r','i','z'],w1=2000,w2=13000):
         '''
         photometry other than UBVRI filters from intergrating spectrum directly
         ugriz filters from SDSS
@@ -73,7 +73,7 @@ class ph_data():
         import speclite.filters
         
         wv = self.data['wv']
-        Fwv = self.data['F_wv']
+        Fwv = self.data['Fwv']
         time = self.data['time']
         
         ### input w1 and w2 specify the region within the filter is included
@@ -89,6 +89,8 @@ class ph_data():
         for i, f in enumerate(filters):
             if f[:3] == 'ZTF':
                 filt.append(f'ZTF-{f[3]}')
+            elif f[:5] == 'ATLAS':
+                filt.append(f'ATLAS-{f[5]}')
             else:
                 filt.append(f'sdss2010-{f}')
                 

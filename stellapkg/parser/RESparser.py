@@ -112,7 +112,7 @@ class res_data():
             for j, key in enumerate(reskeys):
                 x0, x1 = colspecs[j]
                 dataentry = line[x0:x1].strip()
-                if (dataentry[4:6]=='-1') and (dataentry[4:6]!='E-'):
+                if (dataentry[4:6] in ['-1','-2','-3']) and (dataentry[4:6]!='E-'):
                     dataentry = dataentry[:4]+'E'+dataentry[4:]
                 data[key].append(dataentry)
         for key in reskeys:
@@ -263,9 +263,15 @@ class res_data():
         datan['temp'] = temp
         datan['trad'] = trad
         
+        thom_sc = 0.665e-24
         rhobar = Mtot*physcons.MSUN/(4.*physcons.PI*np.max(datan['rad'])**3./3.)
         datan['rhoNm'] = datan['rho']/rhobar
+        datan['radNm'] = datan['rad']/max(datan['rad'])
         datan['nenb'] = datan['n_e']/datan['n_bar']
+        datan['kskt'] = thom_sc*datan['n_e']/datan['rho']/datan['cappa']
+        for i, item in enumerate(datan['kskt']):
+            if item > 1.0:
+                datan['kskt'][i] = 1.0
         
         dMr = self._hyd.data['dm']*physcons.MSUN       
         vol = dMr[datan['zone']-1]/datan['rho']/1e51
@@ -288,7 +294,7 @@ class res_data():
         return results[0]    
 
         
-    def get_phots(self,thm=False,propert=False):
+    def get_phots(self,rec=False,thm=False,propert=False):
         '''
         Compute photosperic properties from profile
         if thm=True, thermalization depth properties also included
@@ -302,7 +308,7 @@ class res_data():
         reskeys = STLkeys.reskeys
         reskeys = [k+'ph' for k in reskeys]
         datan = {k:[] for k in reskeys}
-        dict_ = {'tau':[], 'rhoNmph':[], 'nenbph':[]}
+        dict_ = {'tau':[], 'rhoNmph':[], 'radNmph':[], 'nenbph':[], 'ksktph':[]}
         datan.update(dict_)
         
         abnkeys = [_[0] for _ in STLkeys.abnkeys]
@@ -314,6 +320,11 @@ class res_data():
             keys2 = ['tau_thm','Mthm','lgMthm','Rthm','Tthm','Rhothm','Vthm','Kthm']
             dict2 = {k:[] for k in keys2}
             datan.update(dict2)
+
+        if rec:
+            keys3 = ['massrec','logmrec','Rrec']
+            dict3 = {k:[] for k in keys3}
+            datan.update(dict3)
         
         for i, item in enumerate(time):
             prof = self.get_profile(item,propert=propert)
@@ -336,6 +347,15 @@ class res_data():
                     datan[k].append(prof[k[:-2]][ntau])
             for _ in abnkeys:
                 Xph[_].append(x[_][zontau])
+                
+            if rec:
+                n_rec=-1
+                for j in range(0,len(zon)-1):
+                    if prof['XHI'][j]<0.1 and prof['XHI'][j+1]>=0.1:
+                        n_rec = j
+                datan['massrec'].append(prof['mass'][n_rec])
+                datan['logmrec'].append(prof['logm'][n_rec])
+                datan['Rrec'].append(rad[n_rec])
             
             if thm:
                 thom_sc = 0.665e-24

@@ -10,7 +10,7 @@ from stellapkg.parser.HYDparser import hyd_data
 import numpy as np
 import matplotlib.pyplot as plt
 
-def abnplot(*a,elems=['H','He','C','O','Fe','Ni'],labels=[],xkey='mass',ylog=True,oplot=False):
+def abnplot(*a,elems=['H','He','C','O','Fe','Ni'],labels=[],xkey='mass',ylog=True,oplot=False,legend=True):
     '''
     Plotting chemical structure of the model
     
@@ -62,7 +62,8 @@ def abnplot(*a,elems=['H','He','C','O','Fe','Ni'],labels=[],xkey='mass',ylog=Tru
         
     if not oplot:
         plt.grid(ls='--',c='grey',lw=0.4)
-    plt.legend()
+    if legend:
+        plt.legend()
     plt.tight_layout()
     
 

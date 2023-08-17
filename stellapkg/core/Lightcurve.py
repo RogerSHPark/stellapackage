@@ -17,7 +17,7 @@ def LCplot(*a,filters=['bol','U','B','V','R','I'],colors=['k','c','b','g','r','m
              ylabel='Absolute magnitudes',oplot=False,grid=True,tight=True,legend=True):
 
     ttfilt = ['bol','U','B','V','R','I']
-    phfilt = ['ZTFg','ZTFr','u','g','r','i','z']
+    phfilt = ['ZTFg','ZTFr','ATLASc','ATLASo','u','g','r','i','z']
 
     for i, filt in enumerate(filters):
         if (filt not in ttfilt) and (filt not in phfilt):
@@ -47,7 +47,9 @@ def LCplot(*a,filters=['bol','U','B','V','R','I'],colors=['k','c','b','g','r','m
             time = phm['time']
             mag = phm[filt]
         c = colors[i]
-        plt.plot(time,mag,color=c,ls=ls,label=filt)
+        _ls = ls
+        if len(ls)>1: _ls = ls[i]
+        plt.plot(time,mag,color=c,ls=_ls,label=filt)
     if not oplot:
         if xlim: plt.xlim(x1,x2)
         if ylim: plt.ylim(y1,y2)

@@ -12,7 +12,7 @@ reskeys_eng = ['thermal','virial','kinetic','radiat','gravit','total','gained','
                'vol_gains_pow','tot_gains_pow','viscous virial','virial balance','total balance']
     
 reskeys = ['mass','logm','xm','zone','temp','trad','vel','rad','rho','press',\
-           'cappa','lum','n_bar','n_e','XHI']
+           'cappa','lum','n_bar','n_e','XHI','ERAD']
 
 swdkeys = [('logT',5),('logTrad',6),('vel',4),('logR',3),('logRho',7),('logP',8),\
            ('cappa',12),('L',11),('logqv',9),('eng12',10)]

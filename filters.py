@@ -11,7 +11,7 @@ with a hyphen, e.g. "sdss2010-r".  The group names included with this package
 are:
 
     >>> filter_group_names
-    ['sdss2010', 'decam2014', 'wise2010', 'hsc2017', 'lsst2016', 'bessell', 'BASS', 'MzLS', 'Euclid', 'decamDR1', 'decamDR1noatm', 'gaiadr2', 'ZTF'] #@
+    ['sdss2010', 'decam2014', 'wise2010', 'hsc2017', 'lsst2016', 'bessell', 'BASS', 'MzLS', 'Euclid', 'decamDR1', 'decamDR1noatm', 'gaiadr2', 'ZTF','ATLAS'] #@
 
 List the band names associated with any group using, for example:
 
@@ -246,7 +246,7 @@ import astropy.utils.data
 
 filter_group_names = [
     'sdss2010', 'decam2014', 'wise2010', 'hsc2017', 'lsst2016', 'bessell',
-    'BASS', 'MzLS', 'Euclid', 'decamDR1', 'decamDR1noatm', 'gaiadr2', 'ZTF'] #@
+    'BASS', 'MzLS', 'Euclid', 'decamDR1', 'decamDR1noatm', 'gaiadr2', 'ZTF','ATLAS'] #@
  
 default_wavelength_unit = astropy.units.Angstrom
 
@@ -1804,7 +1804,7 @@ def load_filters(*names):
         filters in the order they were specified.
     """
     # Replace any group wildcards with the corresponding canonical names.
-    filters_path = astropy.utils.data._find_pkg_data_path('data/filters/')
+    filters_path = astropy.utils.data.get_pkg_data_path('data/filters/')
     names_to_load = []
     for name in names:
         group_match = _group_wildcard.match(name)
@@ -1912,7 +1912,7 @@ def load_filter(name, load_from_cache=True, verbose=False):
             raise ValueError(
                 "No such group '{0}'. Choose one of {1}."
                 .format(valid.group(1), filter_group_names))
-        file_name = astropy.utils.data._find_pkg_data_path(
+        file_name = astropy.utils.data.get_pkg_data_path(
             'data/filters/{0}.ecsv'.format(name))
         if not os.path.isfile(file_name):
             raise ValueError("No such filter '{0}' in this group.".format(name))
