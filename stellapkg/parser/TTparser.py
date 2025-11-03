@@ -36,11 +36,16 @@ class tt_data():
         fname = self._filename
         f = open(fname,'r')
         content = f.readlines()
-        cols = content[84].split()
+        
+        for i in range(0,len(content)):
+            if content[i].startswith('  L UBVRI'):
+                indx = i
+                
+        cols = content[indx+1].split()
         
         data = {k:[] for k in cols}
 
-        for i in range(85,len(content)):
+        for i in range(indx+2,len(content)):
             for j in range(0,len(cols)):
                 data[cols[j]].append(float(content[i].split()[j]))
                 

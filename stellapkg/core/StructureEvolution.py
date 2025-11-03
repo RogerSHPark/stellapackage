@@ -8,13 +8,14 @@ Created on Tue Jan 18 15:50:09 2022
 
 from stellapkg.parser.RESparser import res_data
 from stellapkg.parser.SWDparser import swd_data
+from stellapkg.parser.PHparser import ph_data
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
 import matplotlib.patheffects as mpe
 
-def IPplot(*a,key,t1=0,t2=50,tarr=-1,xkey='logm',phots=True,propert=False,oplot=False,grid=True,tight=True,legend=True):
+def IPplot(*a,key,t1=0,t2=50,tarr=-1,xkey='logm',phots=True,propert=False,oplot=False,grid=True,tight=True,legend=True,nzone=250,toffset=0.):
     
     reskeys = ['mass','logm','xm','zone','temp','trad','vel','rad','rho','press',\
             'cappa','n_bar','n_e','lum','XHI','rhoNm','nenb','kskt','ERAD']
@@ -38,25 +39,25 @@ def IPplot(*a,key,t1=0,t2=50,tarr=-1,xkey='logm',phots=True,propert=False,oplot=
         if phots: 
             pts = f.get_phots()
         if propert:
-            time = np.array(f.data['protime'])
+            time = np.array(f.data['protime'])  
         else:
             time = np.array(f.data['obstime'])
         if type(tarr) == int:
-            time2 = time[np.where((time>=t1) & (time<=t2))[0]]
+            time2 = time[np.where((time>=t1+toffset) & (time<=t2+toffset))[0]]
         else:
-            time2 = tarr
+            time2 = np.array(tarr) +toffset
         for i, t in enumerate(time2):
             prof = f.get_profile(t,propert=propert)
             mass = np.array(prof[xkey])
             var = np.array(prof[key])
 
             if key=='lum':
-                plt.plot(mass,np.log10(var),color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} '.format(t)+tunit,\
+                plt.plot(mass,np.log10(var),color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} '.format(t-toffset)+tunit,\
                      path_effects=[mpe.withStroke(linewidth=3,foreground='black')])                    
                 plt.plot(mass,np.log10(-1.*var),ls='--',color=cm.gist_rainbow(i/len(time2)),\
                      path_effects=[mpe.withStroke(linewidth=3,foreground='black')])
             else:
-                plt.plot(mass,np.log10(var),color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} '.format(t)+tunit,\
+                plt.plot(mass,np.log10(var),color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} '.format(t-toffset)+tunit,\
                      path_effects=[mpe.withStroke(linewidth=3,foreground='black')])
             if phots:
                 idx = np.argwhere(time==t)[0][0]
@@ -76,27 +77,27 @@ def IPplot(*a,key,t1=0,t2=50,tarr=-1,xkey='logm',phots=True,propert=False,oplot=
             pts = f.get_phots()
         time = np.array(f.grid['time'])
         if type(tarr) == int:
-            time2 = time[np.where((time>=t1) & (time<=t2))[0]]
+            time2 = time[np.where((time>=t1+toffset) & (time<=t2+toffset))[0]]
         else:
-            time2 = tarr
-        if key=='swdv': 
+            time2 = tarr +toffset
+        if key=='swdvel': 
             key='vel'
-        elif key=='swdk':
+        elif key=='swdcappa':
             key='cappa'
                 
         for i, t in enumerate(time2):
             mass = f.grid[xkey]
             var = f.get_profile(t)[key]
             if key in ['vel','cappa']:
-                plt.plot(mass,np.log10(var),color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} day'.format(t),\
+                plt.plot(mass,np.log10(var),color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} day'.format(t-toffset),\
                      path_effects=[mpe.withStroke(linewidth=3,foreground='black')])
             elif key=='L':
-                plt.plot(mass,np.log10(var),color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} day'.format(t),\
+                plt.plot(mass,np.log10(var),color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} day'.format(t-toffset),\
                      path_effects=[mpe.withStroke(linewidth=3,foreground='black')])                    
                 plt.plot(mass,np.log10(-1.*var),ls='--',color=cm.gist_rainbow(i/len(time2)),\
                      path_effects=[mpe.withStroke(linewidth=3,foreground='black')])
             else:    
-                plt.plot(mass,var,color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} day'.format(t),\
+                plt.plot(mass,var,color=cm.gist_rainbow(i/len(time2)),label='{0:.2e} day'.format(t-toffset),\
                      path_effects=[mpe.withStroke(linewidth=3,foreground='black')])
             if phots:
                 idx = np.argwhere(time==t)[0][0]
@@ -128,10 +129,10 @@ def IPplot(*a,key,t1=0,t2=50,tarr=-1,xkey='logm',phots=True,propert=False,oplot=
             plt.xticks(np.linspace(-5,0,11)); plt.xlim(0,-5) 
             plt.xlabel(r'$\log{(1-M_{r}/M_\mathrm{tot})}$',fontsize=15)
         elif xkey=='mass':
-            plt.xticks(np.linspace(1.4,3.6,12)); plt.xlim(1.4,3.6)
+            plt.xticks(np.linspace(1.4,round(max(mass),2)+0.1,10)); plt.xlim(1.4,round(max(mass),2)+0.1)
             plt.xlabel(r'$M_{r}$',fontsize=15)
         elif xkey=='zone':
-            plt.xticks(np.linspace(0,250,11)); plt.xlim(-5,255)
+            plt.xticks(np.linspace(0,nzone,11)); plt.xlim(-5,nzone+5)
             plt.xlabel('Mass zone',fontsize=15)
             
         if key=='logR' or key=='rad': 
@@ -165,7 +166,7 @@ def IPplot(*a,key,t1=0,t2=50,tarr=-1,xkey='logm',phots=True,propert=False,oplot=
     if tight: plt.tight_layout()
     
 
-def KPHplot(*a,key,levels=[],xkey='logm',keylog=True,propert=False,logt=False,t1=0.,t2=15.,phots=False,rec=False,grid=True,tight=True,toffset=0.):
+def KPHplot(*a,key,levels=[],xkey='logm',keylog=True,propert=False,logt=False,t1=0.,t2=15.,phots=False,rec=False,grid=True,tight=True,toffset=0.,Lneg=True):
         
     reskeys = ['mass','logm','xm','zone','temp','trad','vel','rad','rho','press',\
             'cappa','n_bar','n_e','lum','XHI','rhoNm','nenb','kskt','ERAD']
@@ -224,8 +225,9 @@ def KPHplot(*a,key,levels=[],xkey='logm',keylog=True,propert=False,logt=False,t1
         ctf2 = ax1.contourf(tgrid-toffset,mgrid,z2,levels=levels,cmap=cm.Reds)
         cbar1 = fig.colorbar(ctf1)
         cbar1.ax.tick_params(labelsize=12)
-        cbar2 = fig.colorbar(ctf2)
-        cbar2.ax.tick_params(labelsize=12)
+        if Lneg: 
+            cbar2 = fig.colorbar(ctf2)
+            cbar2.ax.tick_params(labelsize=12)
     else:
         for t in times:
             prof = f.get_profile(t,propert=propert)
@@ -311,7 +313,8 @@ def KPHplot(*a,key,levels=[],xkey='logm',keylog=True,propert=False,logt=False,t1
         cbar.ax.set_ylabel(r'$\log{\kappa}$',fontsize=15)
     elif key=='lum':
         cbar1.ax.set_ylabel('logL',fontsize=15)
-        cbar2.ax.set_ylabel('log(-L)',fontsize=15)
+        if Lneg: 
+            cbar2.ax.set_ylabel('log(-L)',fontsize=15)
     elif key=='nenb':
         cbar.ax.set_ylabel(r'$\log{(n_\mathrm{e}/n_\mathrm{b})}$',fontsize=15)
         if not keylog:
@@ -321,3 +324,77 @@ def KPHplot(*a,key,levels=[],xkey='logm',keylog=True,propert=False,logt=False,t1
         
     if tight: plt.tight_layout()
     if phots: plt.legend(prop={'size':12})
+    
+    
+def PHplot(*a,levels=[],xkey='wavel',tlog=False,xlog=True,keylog=True,t1=0.,t2=15.,l1=1e0,l2=1e5,nl=11,grid=True,tight=True,toffset=0.):
+    
+    f = ph_data(*a)
+    
+    times = np.array(f.data['time'])
+    if xkey=='wavel':
+        x = np.array(f.data['wv'])
+    elif xkey=='freq':
+        x = np.array(f.data['freq'])
+        
+    if xlog:
+        x = np.log10(x)
+    
+    z = []
+    
+    for t in times:
+        Fnu, Fwv = f.get_profile(t)
+        if xkey == 'wavel':
+            z.append(Fwv)
+        elif xkey == 'freq':
+            z.append(Fnu)
+    
+    z = np.array(z)
+    
+    if keylog:
+        z = np.log10(z)
+        
+    if len(levels)==0:
+        zn = z[np.where((times>=t1) & (times<=t2))[0]]
+        levels = np.linspace(np.min(zn),np.max(zn),21)
+
+    z = np.transpose(z)
+
+    fig, ax1 = plt.subplots()        
+    ct = ax1.contour(times-toffset,x,z,levels=levels,linewidths=0.3,colors='k')
+    ctf = ax1.contourf(times-toffset,x,z,levels=levels,cmap=cm.cool)
+    cbar = fig.colorbar(ctf)
+    cbar.ax.tick_params(labelsize=12)
+    
+    ax1.set_xlim(t1,t2)
+    if tlog:
+        ax1.set_xscale('log')
+        ax1.set_xlim(max(0.001,t1),t2)
+        
+    ax1.set_xlabel('Time [day]',fontsize=15)
+    
+    if xkey=='wavel':
+        if xlog:
+            ax1.set_yticks(np.linspace(np.log10(l1),np.log10(l2),nl))
+            ax1.set_ylim(np.log10(l1),np.log10(l2))
+            ax1.set_ylabel(r'$\log{\lambda/\AA}$',fontsize=15)
+        elif not xlog:
+            ax1.set_yticks(np.linspace(0,50000,11))
+            ax1.set_ylim(0,50000)
+            ax1.set_ylabel(r'$\lambda [\AA]$',fontsize=15)
+    elif xkey=='freq':
+        if xlog:
+            ax1.set_yticks(np.linspace(13.5,18,10))
+            ax1.set_ylim(18,13.5)
+            ax1.set_ylabel(r'$\log{\nu/{\rm Hz}}$',fontsize=15)
+        elif not xlog:
+            ax1.set_yticks(np.linspace(0,1e18,11))
+            ax1.set_ylim(1e18,0)
+            ax1.set_ylabel(r'\nu [{\rm Hz}]$',fontsize=15)
+            
+    if grid: ax1.grid(ls='--',c='white',lw=0.3)
+    
+    if xkey=='wavel':
+        cbar.ax.set_ylabel(r'$log{F_{\lambda}}$',fontsize=15)
+    
+    if tight: plt.tight_layout()
+    

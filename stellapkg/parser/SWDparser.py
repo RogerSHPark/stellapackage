@@ -44,7 +44,7 @@ class swd_data():
         self._Mtot = Mtot
         
         nlines = len(f[:,0])
-        nzone = 249
+        nzone = len(h.data['mass'])
         nblock = int(nlines/nzone)
         
         grid = {'time':[],'mass':[],'logm':[],'xm':[],'zone':[]}
@@ -126,7 +126,8 @@ class swd_data():
         grid = self.grid
         data = self.data
         x = self._abn.data
-        nzone = 249
+        abnkeys = [_[0] for _ in STLkeys.abnkeys]
+        nzone = len(x[abnkeys[0]])
         
         swdkeys = [_[0] for _ in STLkeys.swdkeys]
         swdkeys = [k+'ph' for k in swdkeys]
@@ -134,7 +135,6 @@ class swd_data():
         dict_ = {'time':[], 'tau':[], 'zoneph':[], 'massph':[], 'logmph':[]}
         datan.update(dict_)
         
-        abnkeys = [_[0] for _ in STLkeys.abnkeys]
         Xph = {k:[] for k in abnkeys}
         
         tau = np.zeros((nzone),float)

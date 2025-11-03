@@ -65,12 +65,13 @@ class ph_data():
         return data
     
     
-    def get_photm(self,filters=['ZTFg','ZTFr','ATLASc','ATLASo','u','g','r','i','z'],w1=2000,w2=13000):
+    def get_photm(self,filters=['SwiftU','ZTFg','ZTFr','ATLASc','ATLASo','up','gp','rp','ip','zp','U','B','V','R','I'],w1=2000,w2=13000):
         '''
         photometry other than UBVRI filters from intergrating spectrum directly
         ugriz filters from SDSS
+        bessell UBVRI filters
         '''
-        import speclite.filters
+        from speclite import filters as specfilters
         
         wv = self.data['wv']
         Fwv = self.data['Fwv']
@@ -91,10 +92,14 @@ class ph_data():
                 filt.append(f'ZTF-{f[3]}')
             elif f[:5] == 'ATLAS':
                 filt.append(f'ATLAS-{f[5]}')
+            elif f[:5] == 'Swift':
+                filt.append(f'Swift-{f[5]}')
+            elif f[-1] == 'p':
+                filt.append(f'sdss2010-{f[0]}')
             else:
-                filt.append(f'sdss2010-{f}')
+                filt.append(f'bessell-{f}')
                 
-        bands = speclite.filters.load_filters(*filt)
+        bands = specfilters.load_filters(*filt)
         mags = bands.get_ab_magnitudes(Fwv,wv)
         for i,f in enumerate(filt):
             photm[filters[i]] = np.array(mags[f])
